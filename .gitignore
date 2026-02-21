@@ -1,0 +1,32 @@
+# Dependências
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Meio Ambiente (Segurança)
+.env
+.env.local
+.env.production
+
+# Logs e Monitoramento (Útil para o PM2 no seu servidor Linux)
+logs
+*.log
+npm-debug.log*
+
+# IDEs (Windows e VS Code)
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Sistema (macOS e Windows)
+.DS_Store
+Thumbs.db
+
+# Pasta de Build (caso você use Babel ou TypeScript futuramente)
+dist/
+build/
