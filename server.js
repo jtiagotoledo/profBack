@@ -5,7 +5,7 @@ import cors from 'cors';
 dotenv.config(); 
 
 import authRoutes from './routes/authRoutes.js';
-import Atividade from './models/atividades.js';
+import testeRoutes from './routes/testeRoutes.js';
 import connectDB from './config/db.js';
 
 const app = express();
@@ -15,27 +15,10 @@ app.use(cors());
 connectDB();
 
 app.use('/auth', authRoutes);
+app.use('/teste', testeRoutes);
 
 app.get('/', (req, res) => {
   res.send('Backend do Assistente do Professor v2 rodando com sucesso!');
-});
-
-app.post('/teste-inserir', async (req, res) => {
-  try {
-    const novaAtividade = new Atividade({
-      titulo: "Teste de Conexão V2",
-      descricao: "Inserindo documento no MongoDB via domínio DuckDNS",
-      materia: "Programação"
-    });
-
-    const salvo = await novaAtividade.save(); 
-    res.status(201).json({
-      message: "Documento inserido com sucesso!",
-      dados: salvo
-    });
-  } catch (error) {
-    res.status(500).json({ message: "Erro ao inserir", erro: error.message });
-  }
 });
 
 const PORT = process.env.PORT || 3001; 
