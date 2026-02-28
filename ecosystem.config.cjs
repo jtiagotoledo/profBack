@@ -2,7 +2,6 @@ module.exports = {
   apps : [{
     name            : "profBack",
     script          : "server.js",
-    node_args       : "--experimental-modules", 
     env: {
       NODE_ENV: "development",
     },
