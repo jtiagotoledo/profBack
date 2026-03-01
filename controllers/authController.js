@@ -1,20 +1,21 @@
 import { OAuth2Client } from 'google-auth-library';
 import UserModel from '../models/UserModel.js'
+import { createSendToken } from '../utils/gerarTokenJwt.js'
 
 
 const client = new OAuth2Client(process.env.GOOGLE_WEB_CLIENT_ID);
 export const googleLogin = async (req, res) => {
     const { idToken } = req.body;
-    
+
     try {
         const ticket = await client.verifyIdToken({
             idToken,
             audience: process.env.GOOGLE_WEB_CLIENT_ID,
         });
-        
+
         const payload = ticket.getPayload();
         const { sub, email, name, picture } = payload;
-        console.log('idToken',sub, email, name, picture);
+        console.log('idToken', sub, email, name, picture);
 
         let user = await UserModel.findOne({ email });
 
@@ -22,7 +23,7 @@ export const googleLogin = async (req, res) => {
             user = await UserModel.create({
                 nome: name,
                 email: email,
-                googleId: sub, 
+                googleId: sub,
                 fotoPerfil: picture,
                 perfilCompleto: false
             });
