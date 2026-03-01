@@ -1,11 +1,18 @@
 import { OAuth2Client } from 'google-auth-library';
-import UserModel from '../models/UserModel.js'
-import { createSendToken } from '../utils/gerarTokenJwt.js'
-
+import UserModel from '../models/UserModel.js';
+import { createSendToken } from '../utils/gerarTokenJwt.js';
 
 const client = new OAuth2Client(process.env.GOOGLE_WEB_CLIENT_ID);
+
 export const googleLogin = async (req, res) => {
     const { idToken } = req.body;
+
+    if (!idToken) {
+        return res.status(400).json({
+            status: 'falha',
+            message: 'O idToken é obrigatório.'
+        });
+    }
 
     try {
         const ticket = await client.verifyIdToken({
@@ -14,28 +21,38 @@ export const googleLogin = async (req, res) => {
         });
 
         const payload = ticket.getPayload();
-        const { sub, email, name, picture } = payload;
-        console.log('idToken', sub, email, name, picture);
-
-        let user = await UserModel.findOne({ email });
-
-        if (!user) {
-            user = await UserModel.create({
-                nome: name,
-                email: email,
-                googleId: sub,
-                fotoPerfil: picture,
-                perfilCompleto: false
+        
+        if (!payload.email_verified) {
+            return res.status(401).json({
+                status: 'falha',
+                message: 'Este e-mail do Google não foi verificado.'
             });
         }
+
+        const { sub, email, name, picture } = payload;
+
+        const user = await UserModel.findOneAndUpdate(
+            { googleId: sub }, 
+            { 
+                nome: name,
+                email: email, 
+                fotoPerfil: picture,
+                ultimoLogin: Date.now() 
+            },
+            { 
+                upsert: true, 
+                new: true, 
+                runValidators: true 
+            }
+        );
 
         createSendToken(user, 200, req, res);
 
     } catch (error) {
-        console.error("Erro na autenticação Google:", error);
+        console.error("Erro detalhado na autenticação Google:", error.message);
         res.status(401).json({
             status: 'falha',
-            message: 'A autenticação com o Google falhou ou o token é inválido.'
+            message: 'Token inválido ou expirado.'
         });
     }
 };
