@@ -53,15 +53,32 @@ export const lancarNota = async (req, res) => {
 
 export const registrarFrequencia = async (req, res) => {
     try {
-        const { data, presente } = req.body;
+        const { data, presente, justificativa } = req.body;
+        const dataDia = new Date(data).setHours(0, 0, 0, 0);
 
-        const aluno = await Aluno.findOneAndUpdate(
-            { _id: req.params.id, professor: req.user.id },
-            { $push: { frequencias: { data, presente } } },
+        const alunoAtualizado = await Aluno.findOneAndUpdate(
+            { 
+                _id: req.params.id, 
+                "frequencias.data": dataDia 
+            },
+            { 
+                $set: { 
+                    "frequencias.$.presente": presente, 
+                } 
+            },
             { new: true }
         );
 
-        res.status(200).json({ status: 'sucesso', data: aluno });
+        if (!alunoAtualizado) {
+            const novoRegistro = await Aluno.findOneAndUpdate(
+                { _id: req.params.id, professor: req.user.id },
+                { $push: { frequencias: { data: dataDia, presente } } },
+                { new: true }
+            );
+            return res.status(200).json({ status: 'sucesso', data: novoRegistro });
+        }
+
+        res.status(200).json({ status: 'sucesso (atualizado)', data: alunoAtualizado });
     } catch (error) {
         res.status(400).json({ status: 'falha', message: error.message });
     }
