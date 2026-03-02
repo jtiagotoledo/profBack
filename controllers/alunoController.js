@@ -53,11 +53,11 @@ export const lancarNota = async (req, res) => {
 
 export const registrarFrequencia = async (req, res) => {
     try {
-        const { data, presente, justificativa } = req.body;
+        const { data, presente } = req.body;
 
         const aluno = await Aluno.findOneAndUpdate(
             { _id: req.params.id, professor: req.user.id },
-            { $push: { frequencias: { data, presente, justificativa } } },
+            { $push: { frequencias: { data, presente } } },
             { new: true }
         );
 
