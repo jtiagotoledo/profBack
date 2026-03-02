@@ -53,7 +53,7 @@ export const lancarNota = async (req, res) => {
 
 export const registrarFrequencia = async (req, res) => {
     try {
-        const { data, presente, justificativa } = req.body;
+        const { data, presente } = req.body;
         const dataDia = new Date(data).setHours(0, 0, 0, 0);
 
         const alunoAtualizado = await Aluno.findOneAndUpdate(
