@@ -5,6 +5,9 @@ import cors from 'cors';
 dotenv.config(); 
 
 import authRoutes from './routes/authRoutes.js';
+import anoRoutes from './routes/anoRoutes.js';
+import classeRoutes from './routes/classeRoutes.js';
+import alunoRoutes from './routes/alunoRoutes.js';
 import testeRoutes from './routes/testeRoutes.js';
 import connectDB from './config/db.js';
 
@@ -15,6 +18,9 @@ app.use(cors());
 connectDB();
 
 app.use('/auth', authRoutes);
+app.use('/anos', anoRoutes);      
+app.use('/classes', classeRoutes); 
+app.use('/alunos', alunoRoutes);
 app.use('/teste', testeRoutes);
 
 app.get('/', (req, res) => {
