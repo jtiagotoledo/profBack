@@ -14,7 +14,6 @@ export const criarClasse = async (req, res) => {
             });
         }
 
-        // 2. Criar a classe vinculando ao Ano e ao Professor
         const novaClasse = await Classe.create({
             nome,
             periodo,
