@@ -54,12 +54,13 @@ export const lancarNota = async (req, res) => {
 export const registrarFrequencia = async (req, res) => {
     try {
         const { data, presente } = req.body;
-        const dataDia = new Date(data).setHours(0, 0, 0, 0);
+
+        const dataAjustada = new Date(data + 'T12:00:00Z'); 
 
         const alunoAtualizado = await Aluno.findOneAndUpdate(
             { 
                 _id: req.params.id, 
-                "frequencias.data": dataDia 
+                "frequencias.data": dataAjustada 
             },
             { 
                 $set: { 
@@ -72,7 +73,7 @@ export const registrarFrequencia = async (req, res) => {
         if (!alunoAtualizado) {
             const novoRegistro = await Aluno.findOneAndUpdate(
                 { _id: req.params.id, professor: req.user.id },
-                { $push: { frequencias: { data: dataDia, presente } } },
+                { $push: { frequencias: { data: dataAjustada, presente } } },
                 { new: true }
             );
             return res.status(200).json({ status: 'sucesso', data: novoRegistro });
