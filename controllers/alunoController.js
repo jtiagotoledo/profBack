@@ -2,19 +2,23 @@ import Aluno from '../models/AlunoModel.js';
 
 export const criarAluno = async (req, res) => {
     try {
-        const { nome, numeroChamada, classeId } = req.body;
+        const { nome, numeroChamada, classeId, ativo } = req.body; 
 
         const novoAluno = await Aluno.create({
             nome,
             numeroChamada,
-            classe: classeId,
-            professor: req.user.id
+            classe: classeId, 
+            professor: req.user.id,
+            ativo: ativo !== undefined ? ativo : true 
         });
 
         res.status(201).json({ status: 'sucesso', data: novoAluno });
     } catch (error) {
         if (error.code === 11000) {
-            return res.status(400).json({ status: 'falha', message: 'Este número de chamada já existe nesta classe.' });
+            return res.status(400).json({ 
+                status: 'falha', 
+                message: 'Este número de chamada já existe nesta classe.' 
+            });
         }
         res.status(400).json({ status: 'falha', message: error.message });
     }

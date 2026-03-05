@@ -22,6 +22,11 @@ const AlunoSchema = new mongoose.Schema({
         type: Number,
         required: [true, 'O número da chamada é obrigatório.']
     },
+    ativo: {
+        type: Boolean,
+        default: true, 
+        required: true
+    },
     classe: { 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Classe', 
