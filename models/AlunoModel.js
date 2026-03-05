@@ -40,7 +40,25 @@ const AlunoSchema = new mongoose.Schema({
     notas: [NotaSchema],
     frequencias: [FrequenciaSchema]
 }, { 
-    timestamps: true 
+    timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true }
+});
+
+AlunoSchema.virtual('media').get(function() {
+    if (!this.notas || this.notas.length === 0) return 0;
+    
+    const soma = this.notas.reduce((acc, nota) => acc + nota.valor, 0);
+    return soma / this.notas.length;
+});
+
+AlunoSchema.virtual('frequencia').get(function() {
+    if (!this.frequencias || this.frequencias.length === 0) return 100;
+
+    const totalDias = this.frequencias.length;
+    const presencas = this.frequencias.filter(f => f.presente === true).length;
+    
+    return Math.round((presencas / totalDias) * 100);
 });
 
 AlunoSchema.index({ numeroChamada: 1, classe: 1 }, { unique: true });
