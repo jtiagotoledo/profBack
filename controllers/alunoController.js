@@ -88,3 +88,33 @@ export const registrarFrequencia = async (req, res) => {
         res.status(400).json({ status: 'falha', message: error.message });
     }
 };
+
+export const atualizarAluno = async (req, res) => {
+    try {
+        const { nome, numeroChamada, ativo } = req.body;
+        
+        const aluno = await Aluno.findOneAndUpdate(
+            { _id: req.params.id, professor: req.user.id },
+            { nome, numeroChamada, ativo },
+            { new: true, runValidators: true }
+        );
+
+        if (!aluno) return res.status(404).json({ status: 'falha', message: 'Aluno não encontrado.' });
+
+        res.status(200).json({ status: 'sucesso', data: aluno });
+    } catch (error) {
+        res.status(400).json({ status: 'falha', message: error.message });
+    }
+};
+
+export const deletarAluno = async (req, res) => {
+    try {
+        const aluno = await Aluno.findOneAndDelete({ _id: req.params.id, professor: req.user.id });
+
+        if (!aluno) return res.status(404).json({ status: 'falha', message: 'Aluno não encontrado.' });
+
+        res.status(204).json({ status: 'sucesso', data: null });
+    } catch (error) {
+        res.status(400).json({ status: 'falha', message: error.message });
+    }
+};

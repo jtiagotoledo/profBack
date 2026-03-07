@@ -64,3 +64,32 @@ export const listarClassesPorAno = async (req, res) => {
         });
     }
 };
+
+export const atualizarClasse = async (req, res) => {
+    try {
+        const { nome } = req.body;
+        const classe = await Classe.findOneAndUpdate(
+            { _id: req.params.id, professor: req.user.id },
+            { nome },
+            { new: true, runValidators: true }
+        );
+
+        if (!classe) return res.status(404).json({ status: 'falha', message: 'Classe não encontrada.' });
+
+        res.status(200).json({ status: 'sucesso', data: classe });
+    } catch (error) {
+        res.status(400).json({ status: 'falha', message: error.message });
+    }
+};
+
+export const deletarClasse = async (req, res) => {
+    try {
+        const classe = await Classe.findOneAndDelete({ _id: req.params.id, professor: req.user.id });
+
+        if (!classe) return res.status(404).json({ status: 'falha', message: 'Classe não encontrada.' });
+
+        res.status(204).json({ status: 'sucesso', data: null });
+    } catch (error) {
+        res.status(400).json({ status: 'falha', message: error.message });
+    }
+};
