@@ -8,11 +8,7 @@ const ClasseSchema = new mongoose.Schema({
     },
     periodo: { 
         type: String, 
-        enum: {
-            values: ['Manhã', 'Tarde', 'Noite'],
-            message: '{VALUE} não é um período válido.'
-        },
-        required: [true, 'O período é obrigatório.']
+        trim: true
     },
     anoLetivo: { 
         type: mongoose.Schema.Types.ObjectId, 
