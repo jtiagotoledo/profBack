@@ -19,7 +19,10 @@ const ClasseSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User', 
         required: [true, 'A turma deve pertencer a um professor.'] 
-    }
+    },
+    diasLetivos: [{ 
+        type: String 
+    }]
 }, { 
     timestamps: true 
 });

@@ -1,4 +1,5 @@
 import Aluno from '../models/AlunoModel.js';
+import Classe from '../models/ClasseModel.js';
 
 export const criarAluno = async (req, res) => {
     try {
@@ -29,7 +30,9 @@ export const listarAlunosPorClasse = async (req, res) => {
         const alunos = await Aluno.find({ 
             classe: req.params.classeId, 
             professor: req.user.id 
-        }).sort('numeroChamada');
+        })
+        .populate({ path: 'classe', select: 'diasLetivos' }) 
+        .sort('numeroChamada');
 
         res.status(200).json({ status: 'sucesso', resultados: alunos.length, data: alunos });
     } catch (error) {
@@ -58,32 +61,31 @@ export const lancarNota = async (req, res) => {
 export const registrarFrequencia = async (req, res) => {
     try {
         const { data, presente } = req.body;
+        const alunoId = req.params.id;
 
-        const dataAjustada = new Date(data + 'T12:00:00Z'); 
-
-        const alunoAtualizado = await Aluno.findOneAndUpdate(
-            { 
-                _id: req.params.id, 
-                "frequencias.data": dataAjustada 
-            },
-            { 
-                $set: { 
-                    "frequencias.$.presente": presente, 
-                } 
-            },
-            { new: true }
+        let aluno = await Aluno.findOneAndUpdate(
+            { _id: alunoId, professor: req.user.id, "frequencias.data": data },
+            { $set: { "frequencias.$.presente": presente } },
+            { new: true, runValidators: true }
         );
 
-        if (!alunoAtualizado) {
-            const novoRegistro = await Aluno.findOneAndUpdate(
-                { _id: req.params.id, professor: req.user.id },
-                { $push: { frequencias: { data: dataAjustada, presente } } },
-                { new: true }
+        if (!aluno) {
+            aluno = await Aluno.findOneAndUpdate(
+                { _id: alunoId, professor: req.user.id },
+                { $push: { frequencias: { data, presente } } },
+                { new: true, runValidators: true }
             );
-            return res.status(200).json({ status: 'sucesso', data: novoRegistro });
         }
 
-        res.status(200).json({ status: 'sucesso (atualizado)', data: alunoAtualizado });
+        if (!aluno) return res.status(404).json({ message: 'Aluno não encontrado.' });
+
+        await Classe.findByIdAndUpdate(aluno.classe, {
+            $addToSet: { diasLetivos: data }
+        });
+
+        const alunoPopulado = await Aluno.findById(aluno._id).populate('classe', 'diasLetivos');
+
+        res.status(200).json({ status: 'sucesso', data: alunoPopulado });
     } catch (error) {
         res.status(400).json({ status: 'falha', message: error.message });
     }

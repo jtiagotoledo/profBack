@@ -65,6 +65,28 @@ export const listarClassesPorAno = async (req, res) => {
     }
 };
 
+export const confirmarPresencaTotal = async (req, res) => {
+    try {
+        const { classeId, data } = req.body;
+
+        const classe = await Classe.findOneAndUpdate(
+            { _id: classeId, professor: req.user.id },
+            { $addToSet: { diasLetivos: data } },
+            { new: true }
+        );
+
+        if (!classe) return res.status(404).json({ message: 'Classe não encontrada.' });
+
+        res.status(200).json({ 
+            status: 'sucesso', 
+            message: 'Dia letivo registrado com sucesso.',
+            data: classe 
+        });
+    } catch (error) {
+        res.status(400).json({ status: 'falha', message: error.message });
+    }
+};
+
 export const atualizarClasse = async (req, res) => {
     try {
         const { nome } = req.body;
