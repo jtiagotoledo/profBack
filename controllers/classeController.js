@@ -67,21 +67,64 @@ export const listarClassesPorAno = async (req, res) => {
 
 export const confirmarPresencaTotal = async (req, res) => {
     try {
-        const { classeId, data } = req.body;
+        const { classeId, data, conteudo } = req.body; 
 
-        const classe = await Classe.findOneAndUpdate(
-            { _id: classeId, professor: req.user.id },
-            { $addToSet: { diasLetivos: data } },
-            { new: true }
-        );
+        const classeExiste = await Classe.findOne({
+            _id: classeId,
+            professor: req.user.id,
+            "diasLetivos.data": data
+        });
+
+        let classe;
+
+        if (classeExiste) {
+            classe = await Classe.findOneAndUpdate(
+                { _id: classeId, professor: req.user.id, "diasLetivos.data": data },
+                { $set: { "diasLetivos.$.conteudo": conteudo || "" } },
+                { new: true }
+            );
+        } else {
+            classe = await Classe.findOneAndUpdate(
+                { _id: classeId, professor: req.user.id },
+                { $push: { diasLetivos: { data, conteudo: conteudo || "" } } },
+                { new: true }
+            );
+        }
 
         if (!classe) return res.status(404).json({ message: 'Classe não encontrada.' });
 
         res.status(200).json({ 
             status: 'sucesso', 
-            message: 'Dia letivo registrado com sucesso.',
+            message: 'Registro da aula atualizado com sucesso.',
             data: classe 
         });
+    } catch (error) {
+        res.status(400).json({ status: 'falha', message: error.message });
+    }
+};
+
+export const atualizarConteudoAula = async (req, res) => {
+    try {
+        const { classeId, data, conteudo } = req.body;
+
+        const classe = await Classe.findOneAndUpdate(
+            { 
+                _id: classeId, 
+                professor: req.user.id,
+                "diasLetivos.data": data 
+            },
+            { $set: { "diasLetivos.$.conteudo": conteudo } },
+            { new: true }
+        );
+
+        if (!classe) {
+            return res.status(404).json({ 
+                status: 'falha', 
+                message: 'Dia letivo não encontrado para esta turma.' 
+            });
+        }
+
+        res.status(200).json({ status: 'sucesso', data: classe });
     } catch (error) {
         res.status(400).json({ status: 'falha', message: error.message });
     }

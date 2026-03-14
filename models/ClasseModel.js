@@ -1,5 +1,10 @@
 import mongoose from 'mongoose';
 
+const DiaLetivoSchema = new mongoose.Schema({
+    data: { type: String, required: true }, 
+    conteudo: { type: String, trim: true, default: "" }
+}, { _id: false });
+
 const ClasseSchema = new mongoose.Schema({
     nome: { 
         type: String, 
@@ -20,9 +25,7 @@ const ClasseSchema = new mongoose.Schema({
         ref: 'User', 
         required: [true, 'A turma deve pertencer a um professor.'] 
     },
-    diasLetivos: [{ 
-        type: String 
-    }]
+    diasLetivos: [DiaLetivoSchema]
 }, { 
     timestamps: true 
 });
