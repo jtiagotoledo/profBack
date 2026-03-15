@@ -67,37 +67,27 @@ export const listarClassesPorAno = async (req, res) => {
 
 export const confirmarPresencaTotal = async (req, res) => {
     try {
-        const { classeId, data, conteudo } = req.body; 
+        const { classeId, data, conteudo } = req.body;
 
-        const classeExiste = await Classe.findOne({
-            _id: classeId,
-            professor: req.user.id,
-            "diasLetivos.data": data
-        });
+        const classe = await Classe.findOne({ _id: classeId, "diasLetivos.data": data });
 
-        let classe;
-
-        if (classeExiste) {
-            classe = await Classe.findOneAndUpdate(
-                { _id: classeId, professor: req.user.id, "diasLetivos.data": data },
-                { $set: { "diasLetivos.$.conteudo": conteudo || "" } },
-                { new: true }
+        if (classe) {
+            await Classe.updateOne(
+                { _id: classeId, "diasLetivos.data": data },
+                { $set: { "diasLetivos.$.conteudo": conteudo || "" } }
             );
         } else {
-            classe = await Classe.findOneAndUpdate(
-                { _id: classeId, professor: req.user.id },
-                { $push: { diasLetivos: { data, conteudo: conteudo || "" } } },
-                { new: true }
-            );
+            await Classe.findByIdAndUpdate(classeId, {
+                $push: { 
+                    diasLetivos: { 
+                        data: data, 
+                        conteudo: conteudo || "" 
+                    } 
+                }
+            });
         }
 
-        if (!classe) return res.status(404).json({ message: 'Classe não encontrada.' });
-
-        res.status(200).json({ 
-            status: 'sucesso', 
-            message: 'Registro da aula atualizado com sucesso.',
-            data: classe 
-        });
+        res.status(200).json({ status: 'sucesso', message: 'Registro atualizado.' });
     } catch (error) {
         res.status(400).json({ status: 'falha', message: error.message });
     }
