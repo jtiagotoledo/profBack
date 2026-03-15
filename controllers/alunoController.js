@@ -80,7 +80,9 @@ export const registrarFrequencia = async (req, res) => {
         if (!aluno) return res.status(404).json({ message: 'Aluno não encontrado.' });
 
         await Classe.findByIdAndUpdate(aluno.classe, {
-            $addToSet: { diasLetivos: data }
+            $addToSet: { 
+                diasLetivos: { data: data } 
+            }
         });
 
         const alunoPopulado = await Aluno.findById(aluno._id).populate('classe', 'diasLetivos');
