@@ -60,7 +60,7 @@ export const lancarNota = async (req, res) => {
 
 export const registrarFrequencia = async (req, res) => {
     try {
-        const { data, presente } = req.body;
+        const { data, presente, conteudo } = req.body; 
         const alunoId = req.params.id;
 
         let aluno = await Aluno.findOneAndUpdate(
@@ -79,11 +79,19 @@ export const registrarFrequencia = async (req, res) => {
 
         if (!aluno) return res.status(404).json({ message: 'Aluno não encontrado.' });
 
-        await Classe.findByIdAndUpdate(aluno.classe, {
-            $addToSet: { 
-                diasLetivos: { data: data } 
-            }
-        });
+        const classeAtualizada = await Classe.findOneAndUpdate(
+            { _id: aluno.classe, "diasLetivos.data": data },
+            { $set: { "diasLetivos.$.conteudo": conteudo || "" } },
+            { new: true }
+        );
+
+        if (!classeAtualizada) {
+            await Classe.findByIdAndUpdate(aluno.classe, {
+                $addToSet: { 
+                    diasLetivos: { data: data, conteudo: conteudo || "" } 
+                }
+            });
+        }
 
         const alunoPopulado = await Aluno.findById(aluno._id).populate('classe', 'diasLetivos');
 
