@@ -1,6 +1,6 @@
 import express from 'express';
 import { criarClasse, listarClassesPorAno, atualizarClasse, 
-    deletarClasse, confirmarPresencaTotal, confirmarProva, atualizarTituloProva } from '../controllers/classeController.js';
+    deletarClasse, confirmarPresencaTotal, confirmarProva } from '../controllers/classeController.js';
 import { protect } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
