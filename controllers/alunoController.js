@@ -42,17 +42,84 @@ export const listarAlunosPorClasse = async (req, res) => {
 
 export const lancarNota = async (req, res) => {
     try {
-        const { titulo, valor, peso } = req.body;
+        const { valor, data } = req.body; 
+        const alunoId = req.params.id;
 
-        const aluno = await Aluno.findOneAndUpdate(
-            { _id: req.params.id, professor: req.user.id },
-            { $push: { notas: { titulo, valor, peso } } },
+        let aluno = await Aluno.findOneAndUpdate(
+            { 
+                _id: alunoId, 
+                professor: req.user.id, 
+                "notas.data": data 
+            },
+            { 
+                $set: { "notas.$.valor": valor } 
+            },
             { new: true, runValidators: true }
         );
 
-        if (!aluno) return res.status(404).json({ message: 'Aluno não encontrado.' });
+        if (!aluno) {
+            aluno = await Aluno.findOneAndUpdate(
+                { _id: alunoId, professor: req.user.id },
+                { 
+                    $push: { notas: { valor, data } } 
+                },
+                { new: true, runValidators: true }
+            );
+        }
+
+        if (!aluno) return res.status(404).json({ 
+            status: 'falha', 
+            message: 'Aluno não encontrado.' 
+        });
 
         res.status(200).json({ status: 'sucesso', data: aluno });
+    } catch (error) {
+        res.status(400).json({ status: 'falha', message: error.message });
+    }
+};
+
+export const lancarNotasEmLote = async (req, res) => {
+    try {
+        const { data, notas } = req.body; 
+
+        if (!notas || !Array.isArray(notas)) {
+            return res.status(400).json({ status: 'falha', message: 'Dados de notas inválidos.' });
+        }
+
+        const operacoes = notas.flatMap(item => [
+            {
+                updateOne: {
+                    filter: { 
+                        _id: item.alunoId, 
+                        professor: req.user.id, 
+                        "notas.data": data 
+                    },
+                    update: { 
+                        $set: { "notas.$.valor": item.valor } 
+                    }
+                }
+            },
+            {
+                updateOne: {
+                    filter: { 
+                        _id: item.alunoId, 
+                        professor: req.user.id, 
+                        "notas.data": { $ne: data } 
+                    },
+                    update: { 
+                        $push: { notas: { valor: item.valor, data } } 
+                    }
+                }
+            }
+        ]);
+
+        await Aluno.bulkWrite(operacoes);
+
+        res.status(200).json({ 
+            status: 'sucesso', 
+            message: `Notas processadas com sucesso para a data ${data}.` 
+        });
+
     } catch (error) {
         res.status(400).json({ status: 'falha', message: error.message });
     }

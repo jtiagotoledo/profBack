@@ -1,11 +1,9 @@
 import mongoose from 'mongoose';
 
 const NotaSchema = new mongoose.Schema({
-    titulo: { type: String, required: true },
     valor: { type: Number, required: true, min: 0, max: 10 },
-    peso: { type: Number, default: 1 },
-    dataLancamento: { type: Date, default: Date.now }
-});
+    data: { type: String, required: true } // Ex: "2026-03-18"
+}, { _id: false });
 
 const FrequenciaSchema = new mongoose.Schema({
     data: { type: String, required: true }, 
@@ -49,7 +47,8 @@ AlunoSchema.virtual('media').get(function() {
     if (!this.notas || this.notas.length === 0) return 0;
     
     const soma = this.notas.reduce((acc, nota) => acc + nota.valor, 0);
-    return soma / this.notas.length;
+    const resultado = soma / this.notas.length;
+    return Number(resultado.toFixed(1));
 });
 
 AlunoSchema.virtual('frequenciaPorcentagem').get(function() {
