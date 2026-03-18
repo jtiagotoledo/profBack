@@ -149,33 +149,6 @@ export const confirmarProva = async (req, res) => {
     }
 };
 
-export const atualizarTituloProva = async (req, res) => {
-    try {
-        const { classeId, data, titulo } = req.body;
-
-        const classe = await Classe.findOneAndUpdate(
-            { 
-                _id: classeId, 
-                professor: req.user.id,
-                "diasProvas.data": data 
-            },
-            { $set: { "diasProvas.$.titulo": titulo } },
-            { new: true }
-        );
-
-        if (!classe) {
-            return res.status(404).json({ 
-                status: 'falha', 
-                message: 'Nenhuma prova encontrada nesta data para esta turma.' 
-            });
-        }
-
-        res.status(200).json({ status: 'sucesso', data: classe });
-    } catch (error) {
-        res.status(400).json({ status: 'falha', message: error.message });
-    }
-};
-
 export const atualizarClasse = async (req, res) => {
     try {
         const { nome } = req.body;

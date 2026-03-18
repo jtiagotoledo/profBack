@@ -11,7 +11,6 @@ router.post('/', criarClasse);
 router.get('/ano/:anoId', listarClassesPorAno);
 router.patch('/confirmar-dia', confirmarPresencaTotal);
 router.patch('/confirmar-prova', confirmarProva);
-router.patch('/atualizar-titulo-prova', atualizarTituloProva);
 
 router.route('/:id')
     .patch(atualizarClasse)
