@@ -21,14 +21,18 @@ const UserSchema = new mongoose.Schema({
     },
     fotoPerfil: {
         type: String,
-        default: '', 
+        default: '',
     },
     ultimoLogin: {
         type: Date,
         default: Date.now
-    }
+    },
+    isPremium: { type: Boolean, default: false },
+    purchaseToken: { type: String }, 
+    productId: { type: String },    
+    dataPagamento: { type: Date }
 }, {
-    timestamps: true 
+    timestamps: true
 });
 
 UserSchema.index({ email: 1 });

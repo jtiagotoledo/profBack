@@ -9,6 +9,7 @@ import anoRoutes from './routes/anoRoutes.js';
 import classeRoutes from './routes/classeRoutes.js';
 import alunoRoutes from './routes/alunoRoutes.js';
 import testeRoutes from './routes/testeRoutes.js';
+import pagamentosRoutes from './routes/pagamentosRoutes.js';
 import connectDB from './config/db.js';
 
 const app = express();
@@ -21,6 +22,7 @@ app.use('/auth', authRoutes);
 app.use('/anos', anoRoutes);      
 app.use('/classes', classeRoutes); 
 app.use('/alunos', alunoRoutes);
+app.use('/pagamentos', pagamentosRoutes);
 app.use('/teste', testeRoutes);
 
 app.get('/', (req, res) => {
