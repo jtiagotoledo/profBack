@@ -1,5 +1,5 @@
 import { google } from 'googleapis';
-import User from '../models/UserModel'; 
+import User from '../models/UserModel.js'; 
 
 export const verificarPagamento = async (req, res) => {
   const { purchaseToken, productId } = req.body;

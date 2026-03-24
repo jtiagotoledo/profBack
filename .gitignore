@@ -30,3 +30,6 @@ Thumbs.db
 # Pasta de Build (caso você use Babel ou TypeScript futuramente)
 dist/
 build/
+
+# Chaves de segurança do Google
+google-service-account.json
