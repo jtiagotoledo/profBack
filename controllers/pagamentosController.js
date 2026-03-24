@@ -17,7 +17,7 @@ export const verificarPagamento = async (req, res) => {
     });
 
     const response = await androidPublisher.purchases.products.get({
-      packageName: 'com.assistenteprofessor', 
+      packageName: 'com.apolotecnologia.assistenteprofessor', 
       productId: productId,
       token: purchaseToken,
     });
