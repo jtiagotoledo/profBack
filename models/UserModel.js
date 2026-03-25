@@ -12,7 +12,7 @@ const UserSchema = new mongoose.Schema({
         unique: true,
         lowercase: true,
         trim: true,
-        match: [/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/, 'Por favor, insira um e-mail válido.']
+        match: [/^\S+@\S+\.\S+$/, 'Por favor, insira um e-mail válido.']
     },
     googleId: {
         type: String,
@@ -27,14 +27,20 @@ const UserSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    isPremium: { type: Boolean, default: false },
-    purchaseToken: { type: String }, 
+    isPremium: { 
+        type: Boolean, 
+        default: false,
+        index: true 
+    },
+    purchaseToken: { 
+        type: String,
+        unique: true,
+        sparse: true   
+    },
     productId: { type: String },    
     dataPagamento: { type: Date }
 }, {
     timestamps: true
 });
-
-UserSchema.index({ email: 1 });
 
 export default mongoose.model('User', UserSchema);
