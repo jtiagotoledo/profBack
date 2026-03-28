@@ -3,6 +3,15 @@ import Ano from '../models/AnoModel.js';
 export const criarAno = async (req, res) => {
     try {
         const { rotulo } = req.body;
+        const userId = req.user.id;
+
+       const totalAnos = await Ano.countDocuments({ professor: userId });
+        if (!req.user.isPremium && totalAnos >= 1) {
+            return res.status(403).json({
+                status: 'falha',
+                message: 'Limite de 1 ano atingido. Assine o Premium para criar anos ilimitados!'
+            });
+        }
 
         const novoAno = await Ano.create({
             rotulo,
@@ -14,7 +23,6 @@ export const criarAno = async (req, res) => {
             data: novoAno
         });
     } catch (error) {
-        // Erro de índice duplicado (professor tentando criar o mesmo ano duas vezes)
         if (error.code === 11000) {
             return res.status(400).json({
                 status: 'falha',

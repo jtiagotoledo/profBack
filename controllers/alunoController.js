@@ -3,22 +3,35 @@ import Classe from '../models/ClasseModel.js';
 
 export const criarAluno = async (req, res) => {
     try {
-        const { nome, numeroChamada, classeId, ativo } = req.body; 
+        const { nome, numeroChamada, classeId, ativo } = req.body;
+        const userId = req.user.id;
+
+        const totalAlunosNaClasse = await Aluno.countDocuments({ 
+            classe: classeId, 
+            professor: userId 
+        });
+
+        if (!req.user.isPremium && totalAlunosNaClasse >= 10) {
+            return res.status(403).json({ 
+                status: 'falha', 
+                message: 'Limite de 10 alunos por turma atingido na versão gratuita.' 
+            });
+        }
 
         const novoAluno = await Aluno.create({
             nome,
             numeroChamada,
-            classe: classeId, 
+            classe: classeId,
             professor: req.user.id,
-            ativo: ativo !== undefined ? ativo : true 
+            ativo: ativo !== undefined ? ativo : true
         });
 
         res.status(201).json({ status: 'sucesso', data: novoAluno });
     } catch (error) {
         if (error.code === 11000) {
-            return res.status(400).json({ 
-                status: 'falha', 
-                message: 'Este número de chamada já existe nesta classe.' 
+            return res.status(400).json({
+                status: 'falha',
+                message: 'Este número de chamada já existe nesta classe.'
             });
         }
         res.status(400).json({ status: 'falha', message: error.message });
@@ -27,12 +40,12 @@ export const criarAluno = async (req, res) => {
 
 export const listarAlunosPorClasse = async (req, res) => {
     try {
-        const alunos = await Aluno.find({ 
-            classe: req.params.classeId, 
-            professor: req.user.id 
+        const alunos = await Aluno.find({
+            classe: req.params.classeId,
+            professor: req.user.id
         })
-        .populate({ path: 'classe', select: 'diasLetivos' }) 
-        .sort('numeroChamada');
+            .populate({ path: 'classe', select: 'diasLetivos' })
+            .sort('numeroChamada');
 
         res.status(200).json({ status: 'sucesso', resultados: alunos.length, data: alunos });
     } catch (error) {
@@ -42,17 +55,17 @@ export const listarAlunosPorClasse = async (req, res) => {
 
 export const lancarNota = async (req, res) => {
     try {
-        const { valor, data } = req.body; 
+        const { valor, data } = req.body;
         const alunoId = req.params.id;
 
         let aluno = await Aluno.findOneAndUpdate(
-            { 
-                _id: alunoId, 
-                professor: req.user.id, 
-                "notas.data": data 
+            {
+                _id: alunoId,
+                professor: req.user.id,
+                "notas.data": data
             },
-            { 
-                $set: { "notas.$.valor": valor } 
+            {
+                $set: { "notas.$.valor": valor }
             },
             { new: true, runValidators: true }
         );
@@ -60,16 +73,16 @@ export const lancarNota = async (req, res) => {
         if (!aluno) {
             aluno = await Aluno.findOneAndUpdate(
                 { _id: alunoId, professor: req.user.id },
-                { 
-                    $push: { notas: { valor, data } } 
+                {
+                    $push: { notas: { valor, data } }
                 },
                 { new: true, runValidators: true }
             );
         }
 
-        if (!aluno) return res.status(404).json({ 
-            status: 'falha', 
-            message: 'Aluno não encontrado.' 
+        if (!aluno) return res.status(404).json({
+            status: 'falha',
+            message: 'Aluno não encontrado.'
         });
 
         res.status(200).json({ status: 'sucesso', data: aluno });
@@ -80,7 +93,7 @@ export const lancarNota = async (req, res) => {
 
 export const lancarNotasEmLote = async (req, res) => {
     try {
-        const { data, notas } = req.body; 
+        const { data, notas } = req.body;
 
         if (!notas || !Array.isArray(notas)) {
             return res.status(400).json({ status: 'falha', message: 'Dados de notas inválidos.' });
@@ -89,25 +102,25 @@ export const lancarNotasEmLote = async (req, res) => {
         const operacoes = notas.flatMap(item => [
             {
                 updateOne: {
-                    filter: { 
-                        _id: item.alunoId, 
-                        professor: req.user.id, 
-                        "notas.data": data 
+                    filter: {
+                        _id: item.alunoId,
+                        professor: req.user.id,
+                        "notas.data": data
                     },
-                    update: { 
-                        $set: { "notas.$.valor": item.valor } 
+                    update: {
+                        $set: { "notas.$.valor": item.valor }
                     }
                 }
             },
             {
                 updateOne: {
-                    filter: { 
-                        _id: item.alunoId, 
-                        professor: req.user.id, 
-                        "notas.data": { $ne: data } 
+                    filter: {
+                        _id: item.alunoId,
+                        professor: req.user.id,
+                        "notas.data": { $ne: data }
                     },
-                    update: { 
-                        $push: { notas: { valor: item.valor, data } } 
+                    update: {
+                        $push: { notas: { valor: item.valor, data } }
                     }
                 }
             }
@@ -115,9 +128,9 @@ export const lancarNotasEmLote = async (req, res) => {
 
         await Aluno.bulkWrite(operacoes);
 
-        res.status(200).json({ 
-            status: 'sucesso', 
-            message: `Notas processadas com sucesso para a data ${data}.` 
+        res.status(200).json({
+            status: 'sucesso',
+            message: `Notas processadas com sucesso para a data ${data}.`
         });
 
     } catch (error) {
@@ -127,7 +140,7 @@ export const lancarNotasEmLote = async (req, res) => {
 
 export const registrarFrequencia = async (req, res) => {
     try {
-        const { data, presente, conteudo } = req.body; 
+        const { data, presente, conteudo } = req.body;
         const alunoId = req.params.id;
 
         let aluno = await Aluno.findOneAndUpdate(
@@ -154,8 +167,8 @@ export const registrarFrequencia = async (req, res) => {
 
         if (!classeAtualizada) {
             await Classe.findByIdAndUpdate(aluno.classe, {
-                $addToSet: { 
-                    diasLetivos: { data: data, conteudo: conteudo || "" } 
+                $addToSet: {
+                    diasLetivos: { data: data, conteudo: conteudo || "" }
                 }
             });
         }
@@ -171,7 +184,7 @@ export const registrarFrequencia = async (req, res) => {
 export const atualizarAluno = async (req, res) => {
     try {
         const { nome, numeroChamada, ativo } = req.body;
-        
+
         const aluno = await Aluno.findOneAndUpdate(
             { _id: req.params.id, professor: req.user.id },
             { nome, numeroChamada, ativo },

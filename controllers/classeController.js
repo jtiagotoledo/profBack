@@ -4,6 +4,15 @@ import Ano from '../models/AnoModel.js';
 export const criarClasse = async (req, res) => {
     try {
         const { nome, anoLetivoId } = req.body;
+        const userId = req.user.id;
+
+        const totalClasses = await Classe.countDocuments({ professor: userId });
+        if (!req.user.isPremium && totalClasses >= 1) {
+            return res.status(403).json({
+                status: 'falha',
+                message: 'Limite de 1 turma atingido. Assine o Premium para criar turmas ilimitadas!'
+            });
+        }
 
         const anoExiste = await Ano.findOne({ 
             _id: anoLetivoId, 
