@@ -14,8 +14,6 @@ export const createSendToken = (user, statusCode, req, res) => {
     res.status(statusCode).json({
         status: 'sucesso',
         token,
-        data:{
-            user,
-        }
+        user
     });
 };
