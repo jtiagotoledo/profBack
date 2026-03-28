@@ -113,7 +113,7 @@ export const atualizarConteudoAula = async (req, res) => {
                 "diasLetivos.data": data 
             },
             { $set: { "diasLetivos.$.conteudo": conteudo } },
-            { new: true }
+            { new: true, runValidators: true }
         );
 
         if (!classe) {

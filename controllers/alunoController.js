@@ -162,7 +162,7 @@ export const registrarFrequencia = async (req, res) => {
         const classeAtualizada = await Classe.findOneAndUpdate(
             { _id: aluno.classe, "diasLetivos.data": data },
             { $set: { "diasLetivos.$.conteudo": conteudo || "" } },
-            { new: true }
+            { new: true, runValidators: true }
         );
 
         if (!classeAtualizada) {
