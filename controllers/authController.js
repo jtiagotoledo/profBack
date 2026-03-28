@@ -56,3 +56,10 @@ export const googleLogin = async (req, res) => {
         });
     }
 };
+
+export const getMe = (req, res) => {
+    res.status(200).json({
+        status: 'sucesso',
+        data: req.user 
+    });
+};
