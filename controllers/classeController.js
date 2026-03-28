@@ -42,6 +42,7 @@ export const criarClasse = async (req, res) => {
         });
 
     } catch (error) {
+        console.error("ERRO NO CONTROLLER DE CLASSE:", error);
         if (error.code === 11000) {
             return res.status(400).json({
                 status: 'falha',
