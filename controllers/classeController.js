@@ -6,6 +6,8 @@ export const criarClasse = async (req, res) => {
         const { nome, anoLetivoId } = req.body;
         const userId = req.user.id;
 
+        console.log("ID do Professor no Token:", userId);
+
         const totalClasses = await Classe.countDocuments({ professor: userId });
         if (!req.user.isPremium && totalClasses >= 1) {
             return res.status(403).json({
@@ -13,6 +15,8 @@ export const criarClasse = async (req, res) => {
                 message: 'Limite de 1 turma atingido. Assine o Premium para criar turmas ilimitadas!'
             });
         }
+
+        console.log("Total de classes encontradas para este ID:", totalClasses);
 
         const anoExiste = await Ano.findOne({ 
             _id: anoLetivoId, 
