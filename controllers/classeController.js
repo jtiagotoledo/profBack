@@ -9,6 +9,7 @@ export const criarClasse = async (req, res) => {
         console.log("ID do Professor no Token:", userId);
 
         const totalClasses = await Classe.countDocuments({ professor: userId });
+        console.log("Total de classes encontradas para este ID:", totalClasses);
         if (!req.user.isPremium && totalClasses >= 1) {
             return res.status(403).json({
                 status: 'falha',
@@ -16,7 +17,6 @@ export const criarClasse = async (req, res) => {
             });
         }
 
-        console.log("Total de classes encontradas para este ID:", totalClasses);
 
         const anoExiste = await Ano.findOne({ 
             _id: anoLetivoId, 
