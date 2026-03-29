@@ -1,13 +1,13 @@
 import { google } from 'googleapis';
-import User from '../models/UserModel.js'; 
+import User from '../models/UserModel.js';
 
 export const verificarPagamento = async (req, res) => {
   const { purchaseToken, productId } = req.body;
-  const userId = req.user.id; 
+  const userId = req.user.id;
 
   try {
     const auth = new google.auth.GoogleAuth({
-      keyFile: './google-service-account.json', 
+      keyFile: './google-service-account.json',
       scopes: ['https://www.googleapis.com/auth/androidpublisher'],
     });
 
@@ -17,7 +17,7 @@ export const verificarPagamento = async (req, res) => {
     });
 
     const response = await androidPublisher.purchases.products.get({
-      packageName: 'com.apolotecnologia.assistenteprofessor', 
+      packageName: 'com.apolotecnologia.assistenteprofessor',
       productId: productId,
       token: purchaseToken,
     });
@@ -30,9 +30,9 @@ export const verificarPagamento = async (req, res) => {
         dataPagamento: new Date()
       });
 
-      return res.status(200).json({ 
-        success: true, 
-        message: "Acesso Premium liberado com sucesso!" 
+      return res.status(200).json({
+        status: 'sucesso', 
+        message: "Acesso Premium liberado com sucesso!"
       });
     }
 
