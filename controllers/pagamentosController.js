@@ -1,3 +1,4 @@
+import path from 'path';
 import { google } from 'googleapis';
 import User from '../models/UserModel.js';
 
@@ -7,7 +8,7 @@ export const verificarPagamento = async (req, res) => {
 
   try {
     const auth = new google.auth.GoogleAuth({
-      keyFile: './google-service-account.json',
+      keyFile: path.join(process.cwd(), 'google-service-account.json'),
       scopes: ['https://www.googleapis.com/auth/androidpublisher'],
     });
 
@@ -30,8 +31,15 @@ export const verificarPagamento = async (req, res) => {
         dataPagamento: new Date()
       });
 
+      await androidPublisher.purchases.products.acknowledge({
+        packageName: 'com.apolotecnologia.assistenteprofessor',
+        productId: productId,
+        token: purchaseToken,
+      });
+      console.log("✅ Compra confirmada no Google com sucesso!");
+
       return res.status(200).json({
-        status: 'sucesso', 
+        status: 'sucesso',
         message: "Acesso Premium liberado com sucesso!"
       });
     }
@@ -39,7 +47,7 @@ export const verificarPagamento = async (req, res) => {
     return res.status(400).json({ success: false, message: "Pagamento não aprovado." });
 
   } catch (error) {
-    console.error("Erro na validação do Google:", error);
+    console.error("❌ Erro IAP Google:", error.response ? error.response.data : error.message);
     return res.status(500).json({ error: "Erro ao processar validação de compra." });
   }
 };
