@@ -10,6 +10,16 @@ const DiaProvaSchema = new mongoose.Schema({
     titulo: { type: String, required: true, trim: true }
 }, { _id: false });
 
+const MapaSalaSchema = new mongoose.Schema({
+    colunas: { type: Number, default: 4 },
+    linhas: { type: Number, default: 5 },
+    cadeiras: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Aluno',
+        default: null 
+    }]
+}, { _id: false });
+
 const ClasseSchema = new mongoose.Schema({
     nome: { 
         type: String, 
@@ -31,7 +41,11 @@ const ClasseSchema = new mongoose.Schema({
         required: [true, 'A turma deve pertencer a um professor.'] 
     },
     diasLetivos: [DiaLetivoSchema],
-    diasProvas: [DiaProvaSchema]
+    diasProvas: [DiaProvaSchema],
+    mapaSala: { 
+        type: MapaSalaSchema, 
+        default: () => ({ colunas: 4, linhas: 5, cadeiras: Array(20).fill(null) }) 
+    }
 }, { 
     timestamps: true 
 });

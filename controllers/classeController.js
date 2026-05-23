@@ -191,3 +191,40 @@ export const deletarClasse = async (req, res) => {
         res.status(400).json({ status: 'falha', message: error.message });
     }
 };
+
+export const salvarMapaSala = async (req, res) => {
+    try {
+        const { id } = req.params; 
+        const { colunas, linhas, cadeiras } = req.body;
+
+        const classe = await Classe.findOneAndUpdate(
+            { _id: id, professor: req.user.id },
+            { 
+                $set: { 
+                    "mapaSala.colunas": colunas,
+                    "mapaSala.linhas": linhas,
+                    "mapaSala.cadeiras": cadeiras
+                } 
+            },
+            { new: true, runValidators: true }
+        );
+
+        if (!classe) {
+            return res.status(404).json({ 
+                status: 'falha', 
+                message: 'Classe não encontrada.' 
+            });
+        }
+
+        res.status(200).json({ 
+            status: 'sucesso', 
+            message: 'Mapa de sala guardado com sucesso!',
+            data: classe.mapaSala 
+        });
+    } catch (error) {
+        res.status(400).json({ 
+            status: 'falha', 
+            message: error.message 
+        });
+    }
+};
