@@ -210,3 +210,38 @@ export const deletarAluno = async (req, res) => {
         res.status(400).json({ status: 'falha', message: error.message });
     }
 };
+
+export const importarAlunosLote = async (req, res) => {
+    try {
+        const { classeId, alunos } = req.body;
+
+        if (!classeId || !alunos || !Array.isArray(alunos) || alunos.length === 0) {
+            return res.status(400).json({ 
+                status: 'falha',
+                message: "Dados inválidos. A turma ou a lista de alunos está ausente." 
+            });
+        }
+
+        const alunosParaInserir = alunos.map(aluno => ({
+            nome: aluno.nome,
+            numeroChamada: Number(aluno.numero),
+            classe: classeId
+        }));
+
+        const alunosSalvos = await Aluno.insertMany(alunosParaInserir);
+
+        res.status(201).json({
+            status: 'sucesso',
+            message: `${alunosSalvos.length} alunos foram importados com sucesso!`,
+            data: alunosSalvos
+        });
+
+    } catch (error) {
+        console.error("Erro na importação em lote:", error);
+        res.status(500).json({ 
+            status: 'falha', 
+            message: "Erro interno do servidor ao tentar salvar a lista de alunos.", 
+            error: error.message 
+        });
+    }
+};
