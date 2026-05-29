@@ -225,7 +225,8 @@ export const importarAlunosLote = async (req, res) => {
         const alunosParaInserir = alunos.map(aluno => ({
             nome: aluno.nome,
             numeroChamada: Number(aluno.numero),
-            classe: classeId
+            classe: classeId,
+            professor: req.user.id 
         }));
 
         const alunosSalvos = await Aluno.insertMany(alunosParaInserir);
