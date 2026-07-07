@@ -1,6 +1,9 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import path from 'path'; 
+import { fileURLToPath } from 'url'; 
+import fs from 'fs'; 
 
 dotenv.config(); 
 
@@ -12,11 +15,21 @@ import testeRoutes from './routes/testeRoutes.js';
 import pagamentosRoutes from './routes/pagamentosRoutes.js';
 import connectDB from './config/db.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const uploadDir = path.join(__dirname, 'uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
+
 const app = express();
 app.use(express.json());
 app.use(cors());
 
 connectDB();
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/auth', authRoutes);
 app.use('/anos', anoRoutes);      

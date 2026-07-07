@@ -63,3 +63,36 @@ export const getMe = (req, res) => {
         data: req.user 
     });
 };
+
+export const updateFoto = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                status: 'falha',
+                message: 'Nenhum ficheiro enviado. Selecione uma imagem.'
+            });
+        }
+
+        const urlBase = `${req.protocol}://${req.get('host')}`;
+        const fotoUrl = `${urlBase}/uploads/${req.file.filename}`;
+
+        const user = await UserModel.findByIdAndUpdate(
+            req.user.id,
+            { fotoPerfil: fotoUrl },
+            { new: true, runValidators: true }
+        );
+
+        res.status(200).json({
+            status: 'sucesso',
+            message: 'Foto de perfil atualizada com sucesso!',
+            fotoPerfil: user.fotoPerfil
+        });
+
+    } catch (error) {
+        console.error("Erro ao atualizar foto de perfil:", error);
+        res.status(500).json({
+            status: 'falha',
+            message: 'Erro interno ao tentar salvar a foto.'
+        });
+    }
+};
