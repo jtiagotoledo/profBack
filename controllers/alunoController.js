@@ -239,6 +239,19 @@ export const importarAlunosLote = async (req, res) => {
 
     } catch (error) {
         console.error("Erro na importação em lote:", error);
+
+        const isDuplicateError = 
+            error.code === 11000 || 
+            error.message.includes('E11000') || 
+            (error.writeErrors && error.writeErrors.some(e => e.code === 11000));
+
+        if (isDuplicateError) {
+            return res.status(400).json({
+                status: 'falha',
+                message: "Conflito de Número: Um ou mais alunos na sua planilha possuem um número de chamada que já está cadastrado nesta turma."
+            });
+        }
+
         res.status(500).json({ 
             status: 'falha', 
             message: "Erro interno do servidor ao tentar salvar a lista de alunos.", 
