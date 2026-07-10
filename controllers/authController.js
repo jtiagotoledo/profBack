@@ -73,7 +73,9 @@ export const updateFoto = async (req, res) => {
             });
         }
 
-        const urlBase = `${req.protocol}://${req.get('host')}`;
+        const protocolo = req.headers['x-forwarded-proto'] || req.protocol;
+        
+        const urlBase = `${protocolo}://${req.get('host')}`;
         const fotoUrl = `${urlBase}/uploads/${req.file.filename}`;
 
         const user = await UserModel.findByIdAndUpdate(
