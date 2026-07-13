@@ -259,3 +259,37 @@ export const importarAlunosLote = async (req, res) => {
         });
     }
 };
+
+export const exportarNotasPdf = async (req, res) => {
+    try {
+        if (!req.user.isPremium) {
+            return res.status(403).json({ 
+                status: 'falha', 
+                message: 'A exportação de PDF é exclusiva para usuários Premium.' 
+            });
+        }
+
+        const { tipo, id } = req.query; 
+
+        let filtroAlunos = { professor: req.user.id };
+
+        if (tipo === 'classe') {
+            filtroAlunos.classe = id;
+        } else if (tipo === 'ano') {
+            // Se for por ano, primeiro buscamos todas as classes desse ano
+            const classesDoAno = await Classe.find({ ano: id, professor: req.user.id }).select('_id');
+            const classesIds = classesDoAno.map(c => c._id);
+            filtroAlunos.classe = { $in: classesIds };
+        } else {
+            return res.status(400).json({ status: 'falha', message: 'Filtro inválido.' });
+        }
+
+        const alunos = await Aluno.find(filtroAlunos)
+            .populate('classe', 'nome')
+            .sort('numeroChamada');
+
+        res.status(200).json({ status: 'sucesso', data: alunos });
+    } catch (error) {
+        res.status(400).json({ status: 'falha', message: error.message });
+    }
+};

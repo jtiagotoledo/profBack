@@ -2,7 +2,7 @@ import express from 'express';
 import {
     criarAluno, listarAlunosPorClasse, registrarFrequencia,
     atualizarAluno, deletarAluno, lancarNota, lancarNotasEmLote,
-    importarAlunosLote
+    importarAlunosLote, exportarNotasPdf
 } from '../controllers/alunoController.js';
 import { protect } from '../middlewares/authMiddleware.js';
 
@@ -13,6 +13,7 @@ router.use(protect);
 router.post('/', criarAluno);
 router.post('/notas-em-lote', lancarNotasEmLote);
 router.get('/classe/:classeId', listarAlunosPorClasse);
+router.get('/exportar/notas', exportarNotasPdf)
 router.post('/importar-lote', importarAlunosLote);
 router.patch('/:id/nota', lancarNota);
 router.patch('/:id/frequencia', registrarFrequencia);
