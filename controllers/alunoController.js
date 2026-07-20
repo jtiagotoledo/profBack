@@ -281,22 +281,42 @@ export const exportarNotasPdf = async (req, res) => {
         }
 
         let alunos = await Aluno.find(filtroAlunos)
-            .populate('classe', 'nome')
+            .populate('classe', 'nome diasProvas')
             .sort('numeroChamada');
 
-        if (dataInicio && dataFim) {
-            const start = new Date(dataInicio);
-            const end = new Date(dataFim);
+        const start = dataInicio ? new Date(dataInicio) : null;
+        const end = dataFim ? new Date(dataFim) : null;
 
-            alunos = alunos.map(aluno => {
-                const notasFiltradas = aluno.notas.filter(nota => {
+        alunos = alunos.map(aluno => {
+            const alunoObj = aluno.toObject();
+            const diasProvas = alunoObj.classe?.diasProvas || [];
+
+            let notasProcessadas = alunoObj.notas || [];
+
+            // Filtragem pelo período (se as datas foram enviadas)
+            if (start && end) {
+                notasProcessadas = notasProcessadas.filter(nota => {
                     const dataDaNota = new Date(nota.data);
                     return dataDaNota >= start && dataDaNota <= end;
                 });
+            }
+
+            // 3. INJEÇÃO DO TÍTULO: Cruzamos a data da nota com a data de diasProvas
+            notasProcessadas = notasProcessadas.map(nota => {
+                const provaReferente = diasProvas.find(dp => dp.data === nota.data);
                 
-                return { ...aluno.toObject(), notas: notasFiltradas };
+                return {
+                    ...nota,
+                    titulo: provaReferente && provaReferente.titulo ? provaReferente.titulo : 'Atividade'
+                };
             });
-        }
+            
+            alunoObj.notas = notasProcessadas;
+            
+            delete alunoObj.classe.diasProvas; 
+
+            return alunoObj;
+        });
 
         res.status(200).json({ status: 'sucesso', data: alunos });
     } catch (error) {
