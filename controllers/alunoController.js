@@ -273,7 +273,7 @@ export const exportarNotasPdf = async (req, res) => {
         if (tipo === 'classe') {
             filtroAlunos.classe = id;
         } else if (tipo === 'ano') {
-            const classesDoAno = await Classe.find({ ano: id, professor: req.user.id }).select('_id');
+            const classesDoAno = await Classe.find({ anoLetivo: id, professor: req.user.id }).select('_id');
             const classesIds = classesDoAno.map(c => c._id);
             filtroAlunos.classe = { $in: classesIds };
         } else {
