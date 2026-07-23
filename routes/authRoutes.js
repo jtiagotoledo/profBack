@@ -2,7 +2,7 @@ import express from 'express';
 import multer from 'multer';
 import path from 'path';
 import { protect } from '../middlewares/authMiddleware.js';
-import { googleLogin, getMe, updateFoto } from '../controllers/authController.js';
+import { googleLogin, getMe, updateFoto, gerarTokenDev } from '../controllers/authController.js';
 
 const router = express.Router();
 
@@ -28,6 +28,7 @@ const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 router.get('/me', protect, getMe);
 router.post('/google', googleLogin);
+router.post('/dev-token', gerarTokenDev);
 router.patch('/foto', protect, upload.single('foto'), updateFoto);
 
 export default router;

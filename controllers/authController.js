@@ -1,6 +1,8 @@
 import { OAuth2Client } from 'google-auth-library';
 import UserModel from '../models/UserModel.js';
 import { createSendToken } from '../utils/gerarTokenJwt.js';
+import gerarTokenJwt from '../utils/gerarTokenJwt.js';
+import User from '../models/UserModel.js';
 
 const client = new OAuth2Client(process.env.GOOGLE_WEB_CLIENT_ID);
 
@@ -54,6 +56,41 @@ export const googleLogin = async (req, res) => {
             status: 'falha',
             message: 'Token inválido ou expirado.'
         });
+    }
+};
+
+export const gerarTokenDev = async (req, res) => {
+    if (process.env.NODE_ENV === 'production') {
+        return res.status(403).json({ error: 'Acesso negado. Rota disponível apenas para desenvolvimento.' });
+    }
+
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ error: 'O campo email é obrigatório.' });
+    }
+
+    try {
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ error: 'Nenhum usuário encontrado com este email.' });
+        }
+
+        const token = gerarTokenJwt(user._id);
+
+        res.json({
+            message: 'Token de desenvolvimento gerado com sucesso.',
+            token,
+            user: {
+                id: user._id,
+                email: user.email,
+                nome: user.nome
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao gerar o token de teste.' });
     }
 };
 
