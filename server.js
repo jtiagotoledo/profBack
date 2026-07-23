@@ -13,6 +13,8 @@ import classeRoutes from './routes/classeRoutes.js';
 import alunoRoutes from './routes/alunoRoutes.js';
 import testeRoutes from './routes/testeRoutes.js';
 import pagamentosRoutes from './routes/pagamentosRoutes.js';
+import horarioRoutes from './routes/horarioRoutes.js';
+
 import connectDB from './config/db.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -36,6 +38,7 @@ app.use('/anos', anoRoutes);
 app.use('/classes', classeRoutes); 
 app.use('/alunos', alunoRoutes);
 app.use('/pagamentos', pagamentosRoutes);
+app.use('/horarios', horarioRoutes);
 app.use('/teste', testeRoutes);
 
 app.get('/', (req, res) => {
