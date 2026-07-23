@@ -1,7 +1,7 @@
 import { OAuth2Client } from 'google-auth-library';
 import UserModel from '../models/UserModel.js';
 import { createSendToken } from '../utils/gerarTokenJwt.js';
-import gerarTokenJwt from '../utils/gerarTokenJwt.js';
+import { gerarTokenJwt } from '../utils/gerarTokenJwt.js';
 import User from '../models/UserModel.js';
 
 const client = new OAuth2Client(process.env.GOOGLE_WEB_CLIENT_ID);
