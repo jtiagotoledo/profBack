@@ -77,7 +77,7 @@ export const gerarTokenDev = async (req, res) => {
             return res.status(404).json({ error: 'Nenhum usuário encontrado com este email.' });
         }
 
-        const token = gerarTokenJwt(user._id);
+        const token = gerarToken(user._id);
 
         res.json({
             message: 'Token de desenvolvimento gerado com sucesso.',
